@@ -100,6 +100,57 @@ seu <- make_seu(df, AB_vector = AB)
 
 ```
 
+For comparing preprocessing plot coloured by sample
+
+```{r}
+Idents(seu) <- "Batch"
+
+sample.order <- c("3450_0306","3450_0317A","3450_0317B","AIW002_0306","AIW002_0317A","AIW002_0317B","AJG001C_0306","AJG001C_0317A","AJG001C_0317B")
+
+UMAPretro <- DimPlot(seu, reduction = "umap", order = rev(sample.order), cols = alpha(c("cadetblue1","cadetblue2","cadetblue3", "bisque1","bisque2","bisque3","darkolivegreen1","darkolivegreen2","darkolivegreen3"), 0.65), shuffle = TRUE)+ 
+  theme(axis.text.y = element_text(size = 12),axis.text.x = element_text(size = 12))
+UMAPretro
+
+```
+
+```{r}
+png("UMAPretroTransformCompareSamples.png", width = 700, height =450)
+UMAPretro + theme(legend.text = element_text(size=24), axis.title.y = element_text(size=24), 
+         axis.title.x = element_text(size=24), axis.text.y = element_text(size =24),
+        axis.text.x = element_text(size =24))
+dev.off()
+
+
+
+```
+
+
+```{r}
+# the not aligned exmaple object
+sample.order <- c("3450_0306","3450_0317A","3450_0317B","AIW002_0306","AIW002_0317A","AIW002_0317B","AJG001C_0306","AJG001C_0317A","AJG001C_0317B")
+
+
+
+UMAPraw <- DimPlot(seu, reduction = "umap", order = rev(sample.order), cols = alpha(c("cadetblue1","cadetblue2","cadetblue3", "bisque1","bisque2","bisque3","darkolivegreen1","darkolivegreen2","darkolivegreen3"), 0.65), shuffle = TRUE)+ 
+  theme(axis.text.y = element_text(size = 12),axis.text.x = element_text(size = 12))
+UMAPraw
+
+```
+```{r}
+png("UMAPFlowsetCompareSamples.png", width = 700, height =450)
+UMAPraw + theme(legend.text = element_text(size=24), axis.title.y = element_text(size=24), 
+         axis.title.x = element_text(size=24), axis.text.y = element_text(size =24),
+        axis.text.x = element_text(size =24))
+
+dev.off()
+
+
+```
+
+
+
+
+
 Plot with ggplot Figure 3A
 
 ```{r}
@@ -375,12 +426,31 @@ seu <- get_clusters(seu, method = "louvain",
 
 seu <- RunUMAP(seu, spread = 1, min.dist = 0.05, dims = 1:12) # original settings
 # change UMAP parameters for better visualization
+# adjust UMAP visualization 
+
+seu <- RunUMAP(seu, spread = 5, a = 0.7, b = 0.8, dims = 1:12) 
 
 DimPlot(seu, reduction = "umap", label = TRUE, group.by = 'RNA_snn_res.0.7', repel = TRUE)
 
 
 
 ```
+
+
+Save the UMAP with cluster labels
+
+```{r}
+
+Idents(seu) <- 'RNA_snn_res.0.7'
+png("UMAPclusterlables9000samplesS10.png", width = 500, height = 300)
+DimPlot(seu, reduction = "umap", label = TRUE, label.size = 6, repel = TRUE)
+dev.off()
+
+
+```
+
+
+
 
 Add different correlation assignments from the 0.553 threshold and visualize on UMAP from the low threshold for CAM
 
@@ -421,10 +491,17 @@ DimPlot(seu, group.by = 'cor.labels05ft', label = TRUE,
 
 ### save a plot
 
-pdf("UMPAcorlables0553filtered60cells.pdf", width = 6.5, height = 4)
+
+
+
+
+png("UMPAcorlables0553filtered60cellsFigS10.png", width = 500, height = 300)
 DimPlot(seu, group.by = 'cor.labels05ft', label = TRUE, 
         label.size = 5, repel = TRUE)
 dev.off()
+
+
+
 
 ```
 
@@ -486,9 +563,9 @@ DimPlot(seu, group.by = 'cor.labels01ft', label = TRUE,
 # increase overlaps
 #options(ggrepel.max.overlaps = Inf)
 
-pdf("UMPAcorlables01filtered500cells.pdf", width = 10, height = 5)
+png("UMPAcorlables01filtered500cellsFigS10.png", width = 550, height = 300)
 DimPlot(seu, group.by = 'cor.labels01ft', label = TRUE, 
-        label.size = 6, repel = TRUE, alpha = 0.5)
+        label.size = 5, repel = TRUE)
 dev.off()
 
 table(seu$cor.labels01ft)
@@ -546,6 +623,21 @@ for (i in AB) {
 ```
 
 
+Make figure with the feature plots
+
+```{r}
+
+
+png("FeaturePlotsUMAP.png", width = 1300, height = 600)
+FeaturePlot(seu, features = AB, min.cutoff = 'q1', max.cutoff = 'q97', label = FALSE, ncol = 5)
+dev.off()
+
+
+```
+
+
+
+
 Annotate the cells
 
 ```{r}
@@ -583,9 +675,7 @@ clust.colours <- c("chocolate3","darkorange","plum1","deeppink1","lightpink1",
                    "seagreen3","olivedrab4","tomato3","burlywood3")
                    
 
-# adjust UMAP visualization 
 
-seu <- RunUMAP(seu, spread = 5, a = 0.7, b = 0.8, dims = 1:12) 
 
 
 # Figure 3D UMAP with annotated clusters
@@ -617,33 +707,14 @@ levels(seu) <- c("Astrocytes 1", "Astrocytes 2","Radial Glia 1","Radial Glia 2",
                      "Neurons 1","Neurons 2","NPC",
                      "Oligodendrocytes","OPC","Stem cell like","Unassigned")
 
-pdf("HM9000_fig3EMarch.pdf",width = 8.5, height = 5)
+pdf("HM9000_fig3EMay.pdf",width = 8.5, height = 5)
 DoHeatmap(seu, features = AB, size= 6,slot = "scale.data", group.colors = clust.colours, disp.max = 1, disp.min = -1,
-          angle = 90) + scale_fill_gradientn(colors = c("#0b41b5","#5ecc58","#faec70")) + 
+          angle = 90) + scale_fill_gradientn(colors = c("#154c79","#eeeee4","#e28743")) + 
   theme(axis.text.y = element_text(size = 15)) # low, med, high
 dev.off()
 
-### change colours in the heatmap
-
-DoHeatmap(seu, features = AB, size= 6,slot = "scale.data", group.colors = clust.colours, disp.max = 2, disp.min = -1.5,
-          angle = 90) + scale_fill_gradientn(colors = c("#440144FF", "#22A884FF","#FDE725FF")) + 
-  theme(axis.text.y = element_text(size = 15)) # low, med, high
 
 
-DoHeatmap(seu, features = AB, size= 6,slot = "scale.data", group.colors = clust.colours, disp.max = 1, disp.min = -1,
-          angle = 90) + scale_fill_gradientn(colors = c("#403891b2", "#de7065b2","#f7cb44b2")) + 
-  theme(axis.text.y = element_text(size = 15)) # low, med, high
-
-
-
-DoHeatmap(seu, features = AB, size= 6,slot = "scale.data", group.colors = clust.colours, disp.max = 1, disp.min = -1,
-          angle = 90) + scale_fill_gradientn(colors = c("#12206dff", "#de7065ff","#f9b641ff")) + 
-  theme(axis.text.y = element_text(size = 15)) # low, med, high
-
-
-DoHeatmap(seu, features = AB, size= 6,slot = "scale.data", group.colors = clust.colours, disp.max = 2, disp.min = -1,
-          angle = 90) + scale_fill_gradientn(colors = c("#0b41b5","#5ecc58","#faec70")) + 
-  theme(axis.text.y = element_text(size = 15)) # low, med, high
 
 ```
 

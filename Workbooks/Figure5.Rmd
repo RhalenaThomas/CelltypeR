@@ -113,19 +113,28 @@ AB <- c("CD24","CD56","CD29","CD15","CD184","CD133","CD71","CD44","GLAST","AQP4"
 
 seu <- make_seu(df, AB_vector = AB)
 
+
+seu <- RunUMAP(seu2, n.neighbors = 45, b = 0.60, a = 0.60, spread = 5, dims = 1:10)
+
+               
 seu <- get_clusters(seu, method = "louvain",
                          df_input = df,
-                         k = 60,
-                         resolution = c(0.8,1,1.2),
+                         k = 45,
+                         resolution = 1.2,
                          plots = FALSE,
                          save_plots = FALSE)
 
-DimPlot(seu, raster = FALSE, group.by = "Sample", reduction = "umap")
+
 DimPlot(seu, raster = FALSE, label = TRUE, group.by = "RNA_snn_res.1.2")
+
+DimPlot(seu, raster = FALSE, label = TRUE, group.by = "Celltypes")
 
 
 
 ```
+
+
+
 
 
 
@@ -227,7 +236,10 @@ plot_lab_clust(seu.sub, seu.sub$seurat_clusters, seu.sub$cor.labels, filter_out 
 UMAP with cell types predicted > 200
 
 ```{r, fig.width=4}
-DimPlot(seu.sub, group.by = "cor.labels", raster = FALSE, label = TRUE)
+
+
+DimPlot(seu.sub, group.by = "cor.labels", raster = FALSE, label = TRUE, repel = TRUE, label.size = 3)
+
 ```
 
 
@@ -380,55 +392,58 @@ clust.colours <- c("chocolate2",# Astrocytes 1
                    "burlywood3" #extra
                    )
 
-DimPlot(seu, cols = clust.colours, shuffle = TRUE, 
-        raster=FALSE, pt.size = 0.1, label = TRUE, 
+DimPlot(seu, cols = alpha(clust.colours, 0.65), shuffle = TRUE, 
+        raster=FALSE, pt.size = 0.1, label = TRUE,label.size = 7, 
         group.by = 'Celltypes',
         order = rev(cell.order))
 
 ```
 
-Adjust UMAP parameters and plot again with alpha 0.5
+
+Figure 5 A contains only batches C and D
 
 ```{r}
 
-unique(seu.all$Celltypes)
 
-
-seu.all <- ScaleData(seu.all)
-seu.all <- RunPCA(seu.all, features = AB, dims = 1:12)
-seu.all <- RunUMAP(seu.all, dims = 1:12, n.neighbors = 60, a = 0.7, b = 0.75)
-
-
-DimPlot(seu.all, group.by = "Celltypes",label = TRUE, raster = FALSE, label.size = 4)
-DimPlot(seu.all, group.by = "Batch",label = TRUE, raster = FALSE, label.size = 4)
-
-colnames(seu.all@meta.data)
-unique(seu.all$ipsc)
-unique(seu.all$Batch)
-unique(seu.all$orig.ident)
-
-
-
-```
-
-
-
-
-save the plot: Figure 5A
-```{r}
-
-pdf("UMAP.all.cells2.pdf",width = 9, height = 4.5)
-DimPlot(seu, cols = clust.colours, shuffle = TRUE, 
-        raster=FALSE, pt.size = 0.001, label = FALSE, 
+Fig5A <- DimPlot(seu, cols = clust.colours, shuffle = TRUE, 
+        raster=FALSE, pt.size = 0.01, label = TRUE,label.size = 3,
         group.by = 'Celltypes',
-        order = rev(cell.order)) +
+        order = rev(cell.order))
+
+Fig5Alpha <- DimPlot(seu, cols = alpha(clust.colours, 0.65), shuffle = TRUE, 
+        raster=FALSE, pt.size = 0.01, label = FALSE,
+        group.by = 'Celltypes',
+        order = rev(cell.order))
+
+pdf("Fig5AUMAPlabelled.pdf",width = 9, height = 5)
+Fig5A +
 theme(legend.text = element_text(size=15), axis.title.y = element_text(size=15), 
          axis.title.x = element_text(size=15), axis.text.y = element_text(size =15),
         axis.text.x = element_text(size =15))
+
+dev.off()
+
+
+pdf("Fig5AUMAPalpha.pdf", width = 9, height = 5)
+Fig5Alpha +
+theme(legend.text = element_text(size=15), axis.title.y = element_text(size=15), 
+         axis.title.x = element_text(size=15), axis.text.y = element_text(size =15),
+        axis.text.x = element_text(size =15))
+
+dev.off()
+
+
+png("Fig5AUMAPalpha.png", width = 1100, height = 600)
+Fig5Alpha +
+theme(legend.text = element_text(size=25), axis.title.y = element_text(size=25), 
+         axis.title.x = element_text(size=25), axis.text.y = element_text(size =25),
+        axis.text.x = element_text(size =25))
+
 dev.off()
 
 
 ```
+
 
 Add batch annotations
 
@@ -479,7 +494,7 @@ proportionplots(seu.all, seu.var = seu.all$Batch, seu.lable = seu.all$Celltypes,
 save the plot figure 5B
 ```{r}
 
-pdf("PercentCelltypesBatch.pdf", width = 5, height = 4)
+pdf("Fig5BPercentCelltypesBatch.pdf", width = 5, height = 4.5)
 proportionplots(seu.all, seu.var = seu.all$Batch, seu.lable = seu.all$Celltypes, groups = "AIW002 Batch", my_colours = clust.colours)
 dev.off()
 

@@ -259,12 +259,10 @@ make_seu <- function(df, AB_vector){
   # create seurat object
   seu <- CreateSeuratObject(counts = tm)
   seu <- AddMetaData(object=seu, metadata=df$Sample, col.name = 'Sample')
-  #seu <- NormalizeData(seu)
+  seu <- NormalizeData(seu)
   seu <- ScaleData(seu)
   seu <- RunPCA(seu, features = AB_vector)
 }
-
-
 
 
 ###### Functions to explore cluster parameters and create clusters in seurat object ############
@@ -806,10 +804,13 @@ get_clusters <- function(seu, method = "louvain",
                          resolution = 0.8,
                          pcdim = 1:10,
                          plots = TRUE,
+                         spread = 1,
+                         par_a = 0.8,
+                         par_b = 0.7
                          save_plots = FALSE) {
   # make the UMAP for all object
-  seu <- RunUMAP(seu, dims = pcdim, n.neighbors = k, min.dist = 0.4,
-                 spread = 1.5)
+  seu <- RunUMAP(seu, dims = pcdim, n.neighbors = k, a = par_a, b = par_b,
+                 spread = spread)
   print("UMAP run")
   if(method == "louvain"){
     seu <- FindNeighbors(seu, dims = pcdim, k.param = k, reduction = "pca")
@@ -1444,7 +1445,7 @@ cluster_annotate <- function(seu, ann.list,
 
   # now add the annotations into the seurat
   # use the simple annnotation function
-  seu <- annotate(seu, annotations = dfcon$consensus, to_label,
+  seu <- add_annotation(seu, annotations = dfcon$consensus, to_label,
                   annotation_name)
 }
 
@@ -1462,7 +1463,7 @@ cluster_annotate <- function(seu, ann.list,
 #' @import Seurat
 #' @importFrom Seurat AddMetaData
 
-annotate <- function(seu, annotations, to_label, annotation_name = "CellType"){
+add_annotation <- function(seu, annotations, to_label, annotation_name = "CellType"){
   Idents(seu) <- to_label
   names(annotations) <- levels(seu)
   seu <- RenameIdents(seu, annotations)
