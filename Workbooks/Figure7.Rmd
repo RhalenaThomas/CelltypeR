@@ -147,6 +147,7 @@ seu <- get_clusters(seu, method = "louvain",
                          plots = TRUE,
                          save_plots = FALSE)
 
+DimPlot(seu, group.by = "seurat_clusters", label = TRUE)
 
 ```
 
@@ -336,7 +337,7 @@ seu <- annotate(seu,annotations = cor.ann$CAM3505,
                 annotation_name = "CAM35")
 
 
-DimPlot(seu, group.by = "CAM35", label = TRUE, label.size = 6)
+DimPlot(seu, group.by = "CAM35", label = TRUE, label.size = 3)
 
 
 ```
@@ -443,7 +444,7 @@ overlabling_markers <- c("CD24","CD56","CD29","CD15","CD184","CD133","CD44", "CD
 seu.t <- seurat_predict(seu.t, seu.r, refdata = seu.r$Celltypes,
                       ref_id = 'Celltypes', down.sample = "none", markers = overlabling_markers)
 
-DimPlot(seu.t, group.by = "seu.pred", reduction = "umap")
+DimPlot(seu, group.by = "seu.pred", reduction = "umap")
 
 ```
 
@@ -470,10 +471,10 @@ seu.ann <- get_annotation(seu.t, seu.t$RNA_snn_res.1, seu.t$seu.pred,
 
 seu.t <- annotate(seu.t, annotations = seu.ann$Seurat, 
                 to_label = "RNA_snn_res.1", 
-                annotation_name = "Seu")
+                annotation_name = "SeuLabel")
 
 
-DimPlot(seu.t, group.by = "Seu", label = TRUE, label.size = 6)
+DimPlot(seu, group.by = "SeuLabel", label = TRUE, label.size = 3)
 
   
 ```
@@ -536,7 +537,7 @@ new_annotations <- c("DA-NPC","Astrocytes 1","Neurons 1","RG1a-Astrocytes 1",
 
 seu.t <- annotate(seu.t, annotations = new_annotations, to_label = "RNA_snn_res.1", annotation_name = "CelltypesMainNew")
 
-DimPlot(seu.t, group.by = "CelltypesMainNew", label = TRUE)
+DimPlot(seu, group.by = "CelltypesMainNew", label = TRUE)
 
 ```
 
@@ -597,15 +598,15 @@ seu.t <- Cell::annotate(seu.t, annotations = days, to_label = "Days_in_FD",
 seu.t$Days_in_FD <- factor(seu.t$Days_in_FD, levels = c("38","63","98","155"))
 
 Idents(seu.t) <- "Days_in_FD"
-DimPlot(seu.t)
+DimPlot(seu, group.by = "Days_in_FD")
 
 ```
 
 See the data split by days in FD
 
 ```{r}
-DimPlot(seu.t, split.by = "Days_in_FD", ncol = 2, label = TRUE)
-DimPlot(seu.t, split.by = "Replicate", ncol = 2, label = TRUE, label.size = 2)
+DimPlot(seu, split.by = "Days_in_FD", ncol = 2, label = TRUE)
+DimPlot(seu, split.by = "Replicate", ncol = 2, label = TRUE, label.size = 2)
 ```
 
 ```{r}
@@ -648,29 +649,64 @@ clust.colours <- c("chocolate2",# Astrocytes 1
 
 UMAP with colours
 
-```{r}
+```{r, fig.width=6}
 
-DimPlot(seu.t, cols = clust.colours, shuffle = TRUE, 
-        raster=FALSE, pt.size = 0.1, label = TRUE, 
+UMAP_7B_label <- DimPlot(seu, cols = clust.colours, shuffle = TRUE, 
+        raster=FALSE, pt.size = 0.001, label = TRUE, 
+        group.by = "CelltypesMainNew",
+        order = rev(cell.order)) 
+
+UMAP_7B_label
+
+UMAP_7B <- DimPlot(seu, cols = alpha(clust.colours), shuffle = TRUE, 
+        raster=FALSE, pt.size = 0.001, label = FALSE, 
         group.by = "CelltypesMainNew",
         order = rev(cell.order)) +
 theme(legend.text = element_text(size=16), axis.title.y = element_text(size=16), 
          axis.title.x = element_text(size=16), axis.text.y = element_text(size =16),
         axis.text.x = element_text(size =16))
 
+
+
+```
+
+Save Plot for Figure 7B
+
+```{r}
+
+
+
 # save the plot
-pdf("UMAPtimeCourse.pdf",width = 9, height = 4.5)
-DimPlot(seu.t, cols = clust.colours, shuffle = TRUE, 
-        raster=FALSE, pt.size = 0.1, label = FALSE, 
-        group.by = "CelltypesMainNew",
-        order = rev(cell.order)) +
+pdf("UMAPtimeCourseLabelled.pdf",width = 9, height = 5)
+UMAP_7B_label +
 theme(legend.text = element_text(size=16), axis.title.y = element_text(size=16), 
          axis.title.x = element_text(size=16), axis.text.y = element_text(size =16),
         axis.text.x = element_text(size =16))
 dev.off()
 
 
+pdf("UMAPtimeCourse.pdf",width = 9, height = 5)
+UMAP_7B +
+theme(legend.text = element_text(size=16), axis.title.y = element_text(size=16), 
+         axis.title.x = element_text(size=16), axis.text.y = element_text(size =16),
+        axis.text.x = element_text(size =16))
+dev.off()
+
+
+png("UMAPtimeCourse.png",width = 1000, height = 600)
+UMAP_7B +
+theme(legend.text = element_text(size=16), axis.title.y = element_text(size=16), 
+         axis.title.x = element_text(size=16), axis.text.y = element_text(size =16),
+        axis.text.x = element_text(size =16))
+dev.off()
+
+
+
+
 ```
+
+
+
 
 Plots some variables to look for differences between groups
 
