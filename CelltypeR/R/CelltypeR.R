@@ -1457,19 +1457,20 @@ cluster_annotate <- function(seu, ann.list,
 #'"astrocytes","radial glia").The data slot to annotate must be indicated.
 #'To label the data slot with the consensus annotation set annotation_name.
 #'Default annotation_name = "CellType".
-#'Example: seu <- annotate(seu, annotations = df$CellTypes, to_label = seu$clusters, annotation_name = "CellTypes")
+#'Example: seu <- add_annotate(seu, annotations = df$CellTypes, to_label = seu$clusters, annotation_name = "CellTypes")
 
 #' @export
 #' @import Seurat
 #' @importFrom Seurat AddMetaData
-
+#'
 add_annotation <- function(seu, annotations, to_label, annotation_name = "CellType"){
-  Idents(seu) <- to_label
-  names(annotations) <- levels(seu)
-  seu <- RenameIdents(seu, annotations)
-  seu <- AddMetaData(object=seu, metadata=Idents(seu), col.name = annotation_name)
+Idents(seu) <- to_label
+names(annotations) <- levels(seu)
+seu <- RenameIdents(seu, annotations)
+seu <- AddMetaData(object=seu, metadata=Idents(seu), col.name = annotation_name)
 
 }
+
 
 ####### function to make a table with the most frequent cell type per cluster
 #' This function takes in a list of annotation data frames
