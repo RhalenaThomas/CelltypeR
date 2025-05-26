@@ -243,26 +243,41 @@ combine_flowframes <- function(list_of_flowframes) {
 #' @export
 #' @examples
 #' make_seu(df = flow_dataframe, AB_vector = markers_names)
+#' This now accounts for negative values that become NaN
 #' @importFrom Seurat CreateSeuratObject AddMetaData
-#' @importFrom dplyr select
 
-make_seu <- function(df, AB_vector){
-  # select the marker values
-  df2 <- df %>% dplyr::select(all_of(AB_vector))
-  # convert to matrix
+
+# updated function
+make_seu <- function(df, AB_vector) {
+  # Select the marker values
+  df2 <- df[, AB_vector, drop = FALSE]
+
+  # Convert to matrix and transpose
   m <- as.matrix(df2)
-  # transpose
-  tm <- t(df2)
-  # add marker names and cell numbers
+  tm <- t(m)
   rownames(tm) <- colnames(df2)
   colnames(tm) <- rownames(df2)
-  # create seurat object
+
+  # Create Seurat object
   seu <- CreateSeuratObject(counts = tm)
-  seu <- AddMetaData(object=seu, metadata=df$Sample, col.name = 'Sample')
+
+  # Add metadata if available
+  if ("Sample" %in% colnames(df)) {
+    seu <- AddMetaData(object = seu, metadata = df$Sample, col.name = 'Sample')
+  }
+  seu <- FindVariableFeatures(seu)
+  seu@assays$RNA@data@x[is.na(seu@assays$RNA@data@x)] <- 0
+  seu <- Seurat::ScaleData(seu, features = Seurat::VariableFeatures(seu))
+  seu <- Seurat::RunPCA(seu, npcs = length(AB_vector), verbose = FALSE)
+
+  # Normalize, scale, and run PCA
   seu <- NormalizeData(seu)
   seu <- ScaleData(seu)
-  seu <- RunPCA(seu, features = AB_vector)
+
+  return(seu)
 }
+
+
 
 
 ###### Functions to explore cluster parameters and create clusters in seurat object ############
@@ -806,7 +821,7 @@ get_clusters <- function(seu, method = "louvain",
                          plots = TRUE,
                          spread = 1,
                          par_a = 0.8,
-                         par_b = 0.7
+                         par_b = 0.7,
                          save_plots = FALSE) {
   # make the UMAP for all object
   seu <- RunUMAP(seu, dims = pcdim, n.neighbors = k, a = par_a, b = par_b,

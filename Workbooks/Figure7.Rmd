@@ -1073,4 +1073,50 @@ permutation_plot(prop_test)
 ```
 
 
+Feature plots over time
+
+```{r}
+
+seu <- readRDS("SeuTimeCourseSub.RDS")
+colnames(seu@meta.data)
+features <- rownames(seu[["RNA"]])
+features
+
+
+```
+
+
+```{r, fig.width=18}
+
+AB <- c("TH","CD24","CD56","CD29","CD15","CD184","CD133","SSEA4","CD44","CD49f","CD140a")
+# the cluster labels will match the active ident
+Idents(seu) <- "CelltypesMainNew"
+# this will let us see one at at time
+for (i in AB) {
+  print(FeaturePlot(seu, features = i, min.cutoff = 'q1', max.cutoff = 'q97', split.by = "Days_in_FD" , label = TRUE))
+}
+
+
+```
+
+
+```{r}
+
+Idents(seu) <- "CelltypesMainNew"
+png("CD56_UMAP.png", width = 1800, height = 350)
+print(FeaturePlot(seu, features = "CD56", min.cutoff = 'q1', max.cutoff = 'q97', split.by = "Days_in_FD" , label = TRUE))
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
 
