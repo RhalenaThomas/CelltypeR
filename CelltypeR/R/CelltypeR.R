@@ -114,13 +114,13 @@ harmonize <-  function(flowset, processing = 'retro',
   } else if (processing == 'align' ) {
     normtr=gaussNorm(transformed_flowset,colnames(transformed_flowset)[two_peaks],max.lms = 2,peak.density.thr = threshold) #Detects and align 2 peaks on the marker 3,5,6,9...14.
     expbe_norm2=normtr$flowset
-    normtr=gaussNorm(expbe_norm2,colnames(expbe_norm2)[one_peak],max.lms = 1,peak.density.thr = 0.05)#Detects and align 1 peak
+    normtr=gaussNorm(expbe_norm2,colnames(expbe_norm2)[one_peak],max.lms = 1,peak.density.thr = threshold)#Detects and align 1 peak
     aligned_transformed_flowset=normtr$flowset
     return(aligned_transformed_flowset)
   } else{
     normtr=gaussNorm(transformed_flowset,colnames(transformed_flowset)[two_peaks],max.lms = 2,peak.density.thr = threshold) #Detects and align 2 peaks on the marker 3,5,6,9...14.
     expbe_norm2=normtr$flowset
-    normtr=gaussNorm(expbe_norm2,colnames(expbe_norm2)[one_peak],max.lms = 1,peak.density.thr = 0.05)#Detects and align 1 peak
+    normtr=gaussNorm(expbe_norm2,colnames(expbe_norm2)[one_peak],max.lms = 1,peak.density.thr = threshold)#Detects and align 1 peak
     aligned_transformed_flowset=normtr$flowset
     retrotransformed_flowset <- inversebiexponentialTransform(aligned_transformed_flowset)
     return(retrotransformed_flowset)
