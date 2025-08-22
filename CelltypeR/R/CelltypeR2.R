@@ -1285,36 +1285,33 @@ RFM_predict <- function(seu, rf){
 #' @importFrom Seurat AddMetaData FindTransferAnchors TransferData
 
 # this funciton leaves more default settings but find the overlapping features between the reference and the query
-# setting anchors number and filter to defaults but permitting testing
 
 seurat_predict <- function(seu.q, seu.r, ref_id = 'labels', assay.q = "RNA", assay.r = "RNA",
-                           down.sample = 500,pred_label = "seu.pred", kf = NA, ka = 5){
-  Idents(seu.r) <- ref_id
-  seu.r <- subset(seu.r, downsample = down.sample)
+                           down.sample = 500, kw = 50,pred_label = "seu.pred", k.anchor = 5, k.filter = NA){
   # 1️⃣ Ensure active assays point to the correct assay
   DefaultAssay(seu.r) <-  assay.r  #
   DefaultAssay(seu.q) <-  assay.q
 
   # 2️⃣ Define overlapping features (antibodies)
   common.features <- intersect(rownames(seu.r), rownames(seu.q))
-  npc <- length(common.features)-1
+
   # run PCA with the common features
   seu.r <- ScaleData(seu.r, features = common.features)
-  seu.r <- RunPCA(seu.r, features = common.features,npcs = npc, reduction.name = "pca")
+  seu.r <- RunPCA(seu.r, features = common.features,npcs = length(common.features)-1)
   seu.q <- ScaleData(seu.q, features = common.features)
-  seu.q <- RunPCA(seu.q, features = common.features,npcs = npc, reduction.name = "pca")
+  seu.q <- RunPCA(seu.q, features = common.features,npcs = length(common.features)-1)
 
   # 3️⃣ Find anchors using scaled data
   anchors <- FindTransferAnchors(
     reference = seu.r,
     query = seu.q,
-    features = common.features, npcs = npc, dims = 1:npc, k.filter = kf, k.anchor = ka)
+    features = common.features, npcs = length(common.features)-1, dims = 1:length(common.features)-1, reference.reduction = "pca")
   # 4️⃣ Transfer labels & get prediction scores
 # this will make a dataframe - if we add in the query and reference it makes a seurat object
     pred <- TransferData(
     anchorset = anchors,
     refdata = seu.r@meta.data[[ref_id]],       # column in metadata with cell type labels
-    dims = 1:npc
+    dims = 1:length(common.features)-1
   )
 
   # 5️⃣ Add predictions to query object
@@ -1594,7 +1591,6 @@ plotproportions <- function(seu, var.list, xgroup, varnames, my_colours = 'defau
 
 #' Plot mean values by group in dotplot or heatmap
 #'
-#'
 #'This function takes a Seurat object and creates a heatmap or dotplot.
 #'This function takes a Seurat object and a list of variables to plot. One
 #'var_names is a vector with the levels of the seurat groups to be plotted
@@ -1605,16 +1601,17 @@ plotproportions <- function(seu, var.list, xgroup, varnames, my_colours = 'defau
 
 #' @export
 #' @import data.table
-plotmean <- function(plot_type = 'heatmap',seu, group, markers, var_names, input_assay = "RNA",
+plotmean <- function(plot_type = 'heatmap',seu, group, markers, var_names, slot = 'scale.data',
                      xlab = 'Cell Types', ylab = 'Markers',
                      cluster_order=NULL, marker_order=NULL, low_colour = "grey",
                      mid_colour = "white", high_colour = "red"){
-  express.by.cluster <- AggregateExpression(seu, features = markers, group.by = group, assay = input_assay)
-  express.by.cluster <- as.data.frame(scale(express.by.cluster[[1]]))
+  express.by.cluster <- as.data.frame(AverageExpression(seu, features = markers,
+                                                        group.by = group, slot = 'scale.data'))
+  express.by.cluster <- as.data.frame(scale(express.by.cluster))
   if(length(var_names) == length(express.by.cluster)){
     col.names <- var_names
   }else{
-    col.names <- colnames(express.by.cluster[[1]])
+    col.names <- colnames(express.by.cluster)
   }
   # Check if cluster_order is NULL and set it to var_names if it is
   if (is.null(cluster_order)) {
@@ -1659,59 +1656,6 @@ plotmean <- function(plot_type = 'heatmap',seu, group, markers, var_names, input
             )
   } else {
     print("not a valid plotting option")
-  }
-}
-
-
-# plot heatmap and split by genotype
-meanplot_split <- function(dt.long, cluster_order, marker_order,
-                         low_colour = "blue", mid_colour = "white", high_colour = "red",
-                         xlab = "Cell type", ylab = "Marker", split.by = NULL) {
-
-  if (!is.null(split.by)) {
-    # --- Robust splitting: separate CellType and SplitVar by LAST underscore ---
-    dt.long[, CellType := sub("_(.*)$", "", variable)]
-    dt.long[, SplitVar := sub(".*_", "", variable)]
-
-    # --- Factor ordering ---
-    dt.long[, CellType := factor(CellType, levels = cluster_order)]
-    dt.long[, SplitVar := factor(SplitVar)]
-    dt.long[, Marker := factor(AB, levels = marker_order)]
-
-    # --- Interaction: order by CellType, then SplitVar inside each ---
-    dt.long[, Combined := interaction(CellType, SplitVar, sep = "_", lex.order = TRUE)]
-
-    # --- Build heatmap ---
-    heatmap_plot <- ggplot(dt.long, aes(x = Combined, y = Marker, fill = value)) +
-      geom_raster() +
-      scale_fill_gradient2(low = low_colour, mid = mid_colour, high = high_colour, na.value = "grey") +
-      labs(x = paste(xlab, if(!is.null(split.by)) paste("+", split.by)), y = ylab) +
-      theme_bw() +
-      theme(
-        axis.text.x = element_text(size = 12, angle = 90, hjust = 0.95, vjust = 0.2),
-        axis.text.y = element_text(size = 12),
-        plot.title  = element_text(size = 12)
-      )
-
-    print(heatmap_plot)
-
-  } else {
-    # No split, just plot directly
-    dt.long[, CellType := factor(variable, levels = cluster_order)]
-    dt.long[, Marker := factor(AB, levels = marker_order)]
-
-    heatmap_plot <- ggplot(dt.long, aes(x = CellType, y = Marker, fill = value)) +
-      geom_raster() +
-      scale_fill_gradient2(low = low_colour, mid = mid_colour, high = high_colour, na.value = "grey") +
-      labs(x = xlab, y = ylab) +
-      theme_bw() +
-      theme(
-        axis.text.x = element_text(size = 12, angle = 90, hjust = 0.95, vjust = 0.2),
-        axis.text.y = element_text(size = 12),
-        plot.title  = element_text(size = 12)
-      )
-
-    print(heatmap_plot)
   }
 }
 
