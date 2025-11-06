@@ -27,28 +27,6 @@ If you use this library please site:
 Thomas, Rhalena A., et al. "CelltypeR: A flow cytometry pipeline to annotate, characterize and isolate single cells from brain organoids." bioRxiv (2022): 2022-11.
 doi: https://doi.org/10.1101/2022.11.11.516066
 
-
-# To install the CelltypeR library
-
------ temporarily not working ---------------
-
-please use the R function from the script as source
-
-Find the file here: 
-https://github.com/RhalenaThomas/CelltypeR/blob/main/CelltypeR/R/CelltypeR.R
-Download this file. 
-
-```R
-# link to the source file in your R script where you load your libraries
-source("~/CelltypeR/R/CelltypeR.R")
-```
-
-Unfortunately you will also need to install dependency libraries.
-Sorry for the inconvience. 
-
-
-
-
 ----- temporarily not working ---------------
 
 
