@@ -39,12 +39,15 @@ https://github.com/RhalenaThomas/CelltypeR/blob/main/CelltypeR/R/CelltypeR.R
 Download this file. 
 
 ```R
-# link to the source file in your R script like your
+# link to the source file in your R script where you load your libraries
 source("~/CelltypeR/R/CelltypeR.R")
 ```
 
 Unfortunately you will also need to install dependency libraries.
 Sorry for the inconvience. 
+
+
+
 
 ----- temporarily not working ---------------
 
