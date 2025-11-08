@@ -45,7 +45,29 @@ CL
 cd /Users/rhalenathomas/GITHUB/CelltypeR
 git add -A
 git commit -m "library import fixed"
+
+# branch protection is on need to make pull request
+git checkout -b fix-package-imports # switches to a new branch
+git push -u origin fix-package-imports
+
+
 ```
+
+
+After I accept the merge request
+
+```
+# Switch to main
+git checkout main
+
+# Update it with the merged changes
+git pull origin main
+
+# (Optional) delete your local feature branch
+git branch -d fix-package-imports
+
+```
+
 
 
 Other notes:
@@ -59,11 +81,8 @@ Check examples
 ```bash
 
 grep -R "@examples" R/
+grep -R "\dontrun" R/
 ```
 
 need to put don't run for those that load an object or run something intensive
 
-#' @examples
-#' \dontrun{
-#' fsc_to_fs(input_folder_fsc, downsample = "none")
-#' }
