@@ -1,7 +1,8 @@
+
 # CelltypeR functions rewrite in baseR when possible to reduce dependencies
 
-
 # density plots
+ 
 # with correct order
 
 library(ggplot2)
@@ -102,6 +103,7 @@ plotdensity_flowset <- function(flowset, sample_include = "all", select_channels
 
 
 
+ 
 # harmonize function - no changes
 
 harmonize <-  function(flowset, processing = 'retro',
@@ -131,18 +133,21 @@ harmonize <-  function(flowset, processing = 'retro',
 }
 
 
+ 
 ######
 
+ 
 #' Convert flowSet to a single dataframe with optional selection of measurement type
-#'
 #' @param flowset A flowSet object
 #' @param output_path Path to save CSV (if save.csv = TRUE)
 #' @param save.csv Logical, whether to save CSV
 #' @param select_measure One of c("all", "Area", "Height", "Width"). Default "Area"
 #' @export
 #' @examples
+#' \dontrun{
 #' flowset_to_csv(flowset)
 #' flowset_to_csv(flowset, output_path = "path/to/location/", save.csv = TRUE)
+#' }
 #### just AB and channel
 flowset_to_csv <- function(flowset, output_path = NULL, save.csv = FALSE,
                            select_measure = "Area") {
@@ -206,26 +211,30 @@ flowset_to_csv <- function(flowset, output_path = NULL, save.csv = FALSE,
 }
 
 
+ 
 ##### updata for seurat 5 ######
+ 
 # df_to_seurat
+ 
 # creates a seurat object from the expression matrix and adds in meta data
 
+ 
 #' Creates a seurat object from the Flow Cytometry expression data frame.
+ 
 #'
 #' Takes in a dataframe created from Flow Cytometry data using the fsc_to_fs and fsc_to_csv
 #' functions. This function creates a Seurat object from the Flow Cytometry expression data
 #' in a data frame format where cells are rows and Markers are columns.  A column indicating
 #' the starting fsc file "Sample" is required and added as meta data into the Seurat object.
-
+#' This now accounts for negative values that become NaN
 #' @export
 #' @examples
+#' \dontrun{
 #' make_seu(df = flow_dataframe, AB_vector = markers_names)
-#' This now accounts for negative values that become NaN
+#' }
 #' @importFrom Seurat CreateSeuratObject AddMetaData
-
-
 # updated function
-make_seu <- function(df, AB_vector) {
+make_seu5 <- function(df, AB_vector) {
   # Select the marker values
   df2 <- df[, AB_vector, drop = FALSE]
   

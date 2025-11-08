@@ -2,7 +2,12 @@
 % Please edit documentation in R/CelltypeR.R
 \name{get_clusters}
 \alias{get_clusters}
-\title{Get clusters and add to seurat object}
+\title{Get clusters and add to seurat object
+This function to in a seurat object and performs the desired method of clustering.
+("louvain","phenograph","flowsom"). With the already optomized conditions. The cluster
+indexes are added to the seurat object. A heat map of the expression of the a Marker
+list by cluster features plot of a UMAP for each marker are plotted plots = TRUE.
+Plots will be saved if an input filepath is given.}
 \usage{
 get_clusters(
   seu,
@@ -12,10 +17,14 @@ get_clusters(
   resolution = 0.8,
   pcdim = 1:10,
   plots = TRUE,
+  spread = 1,
+  par_a = 0.8,
+  par_b = 0.7,
   save_plots = FALSE
 )
 }
 \description{
+Get clusters and add to seurat object
 This function to in a seurat object and performs the desired method of clustering.
 ("louvain","phenograph","flowsom"). With the already optomized conditions. The cluster
 indexes are added to the seurat object. A heat map of the expression of the a Marker

@@ -2,11 +2,15 @@
 % Please edit documentation in R/CelltypeR.R
 \name{Prep_for_stats}
 \alias{Prep_for_stats}
-\title{Prepare a data frame for statistics}
+\title{Prepare a data frame for statistics
+This function takes a Seurat object and creates a data frame with the expression
+values for each cell for each marker.  Columns are created for all the indicated
+variables.  All the variables must exist as meta data in the Seurat object.}
 \usage{
 Prep_for_stats(seu, marker_list, variables, marker_name = "Marker")
 }
 \description{
+Prepare a data frame for statistics
 This function takes a Seurat object and creates a data frame with the expression
 values for each cell for each marker.  Columns are created for all the indicated
 variables.  All the variables must exist as meta data in the Seurat object.

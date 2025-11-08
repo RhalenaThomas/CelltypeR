@@ -2,11 +2,21 @@
 % Please edit documentation in R/CelltypeR.R
 \name{cluster_annotate}
 \alias{cluster_annotate}
-\title{Add the consensus of annotations to a Seurat object from a list}
+\title{Add the consensus of annotations to a Seurat object from a list
+This function takes in a list of data frames with different annotation options.
+Use at least 2 options.  If you simple want to add annotations use "annotate",
+which is called by this function.The data frames can be created in R, read in
+from a csv of txt or created with the "get_annotations" function. All names are
+changed to lower case letters.  Cell type names must be exactly the same to match.
+For example "astrocytes" and "Astrocytes" will be considered the same, but
+"astrocytes" and "astrocyte" will not. The data slot to annotate must be indicated.
+To label the data slot with the consensus annotation set annotation_name. For example
+annotation_name = "CellTypeCon".}
 \usage{
 cluster_annotate(seu, ann.list, annotation_name, to_label)
 }
 \description{
+Add the consensus of annotations to a Seurat object from a list
 This function takes in a list of data frames with different annotation options.
 Use at least 2 options.  If you simple want to add annotations use "annotate",
 which is called by this function.The data frames can be created in R, read in

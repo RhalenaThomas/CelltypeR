@@ -8,12 +8,12 @@ seurat_predict(
   seu.q,
   seu.r,
   ref_id = "labels",
-  seu_meta = seu.r$labels,
+  assay.q = "RNA",
+  assay.r = "RNA",
   down.sample = 500,
-  markers,
-  kw = 50,
-  kfilter = 100,
-  dims = 10
+  pred_label = "seu.pred",
+  kf = NA,
+  ka = 5
 )
 }
 \description{
@@ -22,5 +22,5 @@ An annotated Seurat object is required. The list of marker or features is requir
 Predictions of cell type for each cell are made using anchors. To increase speed use down.sample
 to down sample the reference by the cell types. Markers is a list of the flow cytometery antibodies,
 a vector of selected features(genes) is possible. The predictions will be added to the
-Seurat object as 'seu.pred'.
+Seurat object as prediction name.
 }

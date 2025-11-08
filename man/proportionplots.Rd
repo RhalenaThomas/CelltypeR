@@ -2,7 +2,8 @@
 % Please edit documentation in R/CelltypeR.R
 \name{proportionplots}
 \alias{proportionplots}
-\title{Plot barcharts of proportion of cell types grouped by a list of variables}
+\title{Plot barcharts of proportion of cell types grouped by a list of variables
+This function takes a Seurat object and creates a boxplot each variable in the list.}
 \usage{
 proportionplots(
   seu,
@@ -13,5 +14,6 @@ proportionplots(
 )
 }
 \description{
+Plot barcharts of proportion of cell types grouped by a list of variables
 This function takes a Seurat object and creates a boxplot each variable in the list.
 }

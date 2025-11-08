@@ -8,8 +8,6 @@ add_annotation <- function(seu, annotations, to_label, annotation_name = "CellTy
 }
 
 
-
-
 plot_Vln_by_cluster <- function(seu, output_pathway, 
                                 input_assay = "ALRA", 
                                 cluster_cols_vector,

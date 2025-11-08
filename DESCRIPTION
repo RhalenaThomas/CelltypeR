@@ -6,7 +6,7 @@ Description: This package is for working with single cell data. There are functi
 License: `use_mit_license()`
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 Imports:
         Rphenograph(>= 0.99.1),
         Seurat(>= 4.3.0),
@@ -29,4 +29,9 @@ Imports:
         data.table(>= 1.14.8),
         reshape2(>= 1.4.4),
         permuco(>= 1.1.2),
-        data.table(>= 1.15.0)
+        data.table(>= 1.15.0),
+	Matrix (>= 1.5.0),
+    	dplyr (>= 1.0.0),
+    	foreach (>= 1.5.0),
+	tidyr,
+    	scales

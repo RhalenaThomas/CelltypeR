@@ -1,29 +1,27 @@
+
 # CellTypeR functions
 
 # note: warnings occur for packages maptools rgdal and rgeos
 # rgeos is phenograph, ggplot2 dependency
 # maptools is a ggplot2 dependency
-
+# used by multiple functions
+#' @importFrom dplyr mutate select group_by summarise filter first last arrange
 
 ####### Preprocessing functions to create seurat object from Flow cytometry multichannel data ####
-
 # reads in fsc files creates a flowset file
 # filtering if wanted on each input file
 # users can rename samples after
-
-
 #' Read in fsc (Flow cytometry) files and creates a flowset file with Channel names
-#'
 #' This function to take in a folder/file path of fsc flow cytometer file selecting the FSC-A
-#' value for each channel.  Each sample file in the folder will be a slot in the flowset object.
+#' value for each channel.Each sample file in the folder will be a slot in the flowset object.
 #' The samples will be names by the file names and can be renamed. The channel names will automatically
 #' be added from within the flow data. If only a subset of cells is desired downsampling is an option.
-
 #' @export
-#' @examples
-#' fsc_to_fs(input_folder_fsc, downsample = "none")
-#' @import flowCore
 #' @importFrom flowCore read.flowSet fsApply
+#' @examples
+#' \dontrun{
+#' fsc_to_fs(input_folder_fsc, downsample = "none")
+#' }
 
 fsc_to_fs <- function(input_path = input_path, downsample = 'none'){
   flowset = read.flowSet(path=input_path,transformation = FALSE ,
@@ -54,12 +52,10 @@ fsc_to_fs <- function(input_path = input_path, downsample = 'none'){
 }
 
 
-
 ##############################################################################################
 # harmonize
 # transform, align, retro transform flowset object
 
-# will be called by transform function
 inversebiexponentialTransform <- function(flowset,a = 0.5, b = 1, c = 0.5, d = 1, f = 0, w = 0){
   copy_flowset=flowset[seq(along=flowset)] #makes a copy of the input flowset
   for (i in 1:length(copy_flowset)){ #loop though index to get each flowframe
@@ -69,37 +65,30 @@ inversebiexponentialTransform <- function(flowset,a = 0.5, b = 1, c = 0.5, d = 1
 }
 
 
-####
 ### process to different levels -
+
 ### if alignment isn't desired there is no need to transform
 ## this function can be used to see different transformations
 ## processing = 'retro' will biex transform, align, retro transform
 ## processing = 'align' will biex transform, align
 ## processing = 'biexp' will biex transform
-
-
 #' Transform and align samples in flowset object
-#'
 #' This function to takes in the flowset object created from a fsc files and transformed the data
 #' If 'retro' (default) is selected the samples will be biexponentially transformed, aligned and then reverse transformed
 #' If 'biexp' is selected the samples will only be biexponentially transformed
 #' If 'align' is selected the samples will be transformed and aligned but not reverse transformed
 #' The two_peaks and one_peak argument refer to the biexp transformed data and are the indexes of which measures have
 #' one or two peaks. At least one measurement of two peaks must be included. You will receive an error if there is only one peak in a measurement defined as having two peaks.
-
-#' @export
+## processing can be 'retro', 'biexp' or 'align'. If not designated retro will be run.
+#'retro' which will perform biexp transform, align peaks and reverse transform
+#'biexp' will preform a biexp transform
+#'align' will perform a biexp transform and align peaks
 #' @examples
+#' \dontrun{
 #' harmonize(flowset, processing = 'retro', two_peaks = c(10:20), one_peak = c(1:9), theshold = 0.01)
-#' processing can be 'retro', 'biexp' or 'align'. If not designated retro will be run.
-#' 'retro' which will perform biexp transform, align peaks and reverse transform
-#' 'biexp' will preform a biexp transform
-#' 'align' will perform a biexp transform and align peaks
-#'
-#'
-#' @import flowCore
+#' }
 #' @importFrom flowCore read.flowSet
 #' @importFrom flowStats gaussNorm
-
 
 harmonize <-  function(flowset, processing = 'retro',
                        two_peaks = c(9:length(colnames(transformed_flowset))),
@@ -127,15 +116,11 @@ harmonize <-  function(flowset, processing = 'retro',
   }
 }
 
-
-
 #### plotting function for visulization ####
 #' Create a density plot from a flowset object
-#'
 #' Takes in a flowset object. Plot density plots for each channel in multichannel fsc
 #' Flow Cytometry data. Creates stacked plots where each row is a sample in the
 #' set object.
-
 #' @export
 #' @import ggridges
 #' @importFrom ggridges geom_density_ridges
@@ -194,16 +179,13 @@ rename_markers <- function(flowset) {
 
 
 #' Create a dataframe from a flowset object and option to save csv
-#'
 #' Takes in a flowset object and creates a dataframe. By default no output path is added and a data frame is returned.
 #' The name of each sample will be added as the column "Sample"
 #' into the final dataframe. To save the dataframe directly as a csv set save.csv = filepath/tosave/
 #' The filename will be the name of the flowset object input into the function.
-#'
-#' @export
-#' @examples
 #' flowset_to_csv(flowset)
 #' flowset_to_csv(flowset, output_path = "path/to/location/", save.csv = TRUE)
+#' 
 #' @importFrom flowCore fsApply
 flowset_to_csv=function(flowset, output_path, save.csv = FALSE){
   list_of_flowframes=fsApply(rename_markers(flowset),function(x){as.data.frame(x@exprs)})#Makes a list of dataframes
@@ -220,7 +202,6 @@ flowset_to_csv=function(flowset, output_path, save.csv = FALSE){
     return(ds)
   }
 
-
 # alternate to list.rbind
 combine_flowframes <- function(list_of_flowframes) {
   # Use do.call and rbind to combine the flow frames
@@ -229,23 +210,23 @@ combine_flowframes <- function(list_of_flowframes) {
   return(combined_flowframe)
 }
 
+
 ##############################################################################################
+
 # df_to_seurat
 # creates a seurat object from the expression matrix and adds in meta data
-
 #' Creates a seurat object from the Flow Cytometry expression data frame.
-#'
 #' Takes in a dataframe created from Flow Cytometry data using the fsc_to_fs and fsc_to_csv
 #' functions. This function creates a Seurat object from the Flow Cytometry expression data
 #' in a data frame format where cells are rows and Markers are columns.  A column indicating
 #' the starting fsc file "Sample" is required and added as meta data into the Seurat object.
-
+#' This now accounts for negative values that become NaN
 #' @export
 #' @examples
+#' \dontrun{
 #' make_seu(df = flow_dataframe, AB_vector = markers_names)
-#' This now accounts for negative values that become NaN
+#' }
 #' @importFrom Seurat CreateSeuratObject AddMetaData
-
 
 # updated function
 make_seu <- function(df, AB_vector) {
@@ -277,21 +258,14 @@ make_seu <- function(df, AB_vector) {
   return(seu)
 }
 
-
-
-
 ###### Functions to explore cluster parameters and create clusters in seurat object ############
-
-
 # explore_param
 # reads in csv files with flow cytometry experiments or seurat data object depending on arguments
 # runs FlowSom, Phenograph, Louvain (Seurat)
 # input arguments - cluster method, for flowsom k, for phenograph and louvain k paramater, for louvain resolution
 # select outputs, generates - UMAPS, heatmaps, clustree  : save to folder or put in global environ
 # creates list object to run stats
-
 #' Explore different clustering methods and parameters in single cell data
-#'
 #' Takes in a Seurat object. Choose a clustering method or vector of clustering methods:
 #' cluster_method = c("louvain","flowsom","phenograph"). The flowsom method requires the
 #' original data frame of the Flow Cytometry expression data. For flows k is the number of
@@ -311,23 +285,22 @@ make_seu <- function(df, AB_vector) {
 #' better cluster. The number of clusters with the highest Calinski-Harabasz index is the optimal number
 #' of clusters (Calinski & Harabasz, 1974). Davies-Bouldin index has no upper bound but the minimum index
 #' is 0. A lower index indicates better clusters (Davies & Bouldin, 1979).
-#'
 #' @examples
-#' explore_param(seuratObj, cluster_method = "flowsom",df_input = flowset_dataframe, flow_k = 10)
+#' \dontrun{
 #' explore_param(seuratObj, cluster_method = "louvain",df_input = flowset_dataframe, flow_k = NULL,
 #' pheno_lou_kn = 100, lou_resolution = c(0,0.5,1), pcdim = 1:10)
+#' }
 #' @export
-#' @import Seurat dplyr FlowSOM cluster fpc clusterSim clustree
+#' @import Seurat FlowSOM cluster fpc clusterSim clustree
 #' @importFrom Seurat CreateSeuratObject AddMetaData
-#' @importFrom dplyr select
 #' @importFrom FlowSOM BuildSOM BuildMST ReadInput
 #' @importFrom cluster daisy
 #' @importFrom fpc calinhara
 #' @importFrom clusterSim index.DB
 #' @importFrom clustree clustree
 #' @importFrom igraph membership
-
 # input is a seurat object
+
 explore_param <- function(input, #for phenograph and louvain only
                           cluster_method, #take 1 cluster method
                           df_input, #required for stats
@@ -338,8 +311,6 @@ explore_param <- function(input, #for phenograph and louvain only
                           run.plot = TRUE, #print if run
                           run.stats = TRUE, #print and return if run
                           save_to = NULL) { #need it if save plots or stats
-
-
   #call helper functions depending on the cluster_method requested
   if (cluster_method == "louvain") {
     cl <- louvain(input = input, #seu object
@@ -488,7 +459,6 @@ flowsom <- function(input, #seurat
   }
 }
 
-
 #helper functions #2:
 phenograph <- function(input,
                        df_input,
@@ -499,7 +469,6 @@ phenograph <- function(input,
                        save_to = NULL) {
 
   clust_method <- "phenograph"
-
   #subsampling for silhouette score, n=9000, if less than 9000 cells, use the full size
   if (run.stats) {
     m <- t(as.matrix(GetAssayData(object = input, slot = "counts")))
@@ -579,7 +548,6 @@ phenograph <- function(input,
   }
 
 }
-
 
 #function #3 - seurat louvain clustering:
 louvain <- function(input, #seu object
@@ -682,12 +650,8 @@ louvain <- function(input, #seu object
   }
 }
 
-
 # clust_stability
-
-
 #' Test the stability or reproducibility of clusters across kn or resolutions
-#'
 #' For Louvain clustering in a seurat object test calculate the RAND Index. For n iterations
 #' each cluser identity for each cell is compared with the other iterations of clustering.
 #' Select one pararmeter to vary resolutions = c(0.1,0.3,0.5,0.8) or kn = c(20,40,60,80).
@@ -755,13 +719,24 @@ clust_stability <- function(input,
 }
 
 
+
 #' Plot cluster stability results from output data
+
 #'
+
 #' Requires the rdf object output from the function clust_stability. The colours and
+
 #' viewable area of the plot can be altered. cp takes a vector of two colours. view takes
+
 #' vector of for the x axis of two coordinates.
 
+
+
+
+
+
 #' @export
+
 #' @import ggplot2
 
 
@@ -799,15 +774,12 @@ plot_randindex <- function (
 
 # choose cluster conditions to make the seurat object
 # method can be "louvain", "phenograph", "flowsom"
-
 #' Get clusters and add to seurat object
-#'
 #' This function to in a seurat object and performs the desired method of clustering.
 #' ("louvain","phenograph","flowsom"). With the already optomized conditions. The cluster
 #' indexes are added to the seurat object. A heat map of the expression of the a Marker
 #' list by cluster features plot of a UMAP for each marker are plotted plots = TRUE.
 #' Plots will be saved if an input filepath is given.
-
 #' @export
 #' @import Seurat ggplot2 FlowSOM Rphenograph Matrix
 #' @importFrom Seurat FindNeighbors FindClusters
@@ -885,8 +857,6 @@ get_clusters <- function(seu, method = "louvain",
   return(seu)
 }
 
-
-
 ########## Functions for annotating clusters ##################################
 
 # input correlation matrix
@@ -895,10 +865,7 @@ get_clusters <- function(seu, method = "louvain",
 # predicts cell types based on each cells correlation to the matrix types
 # creates plots and tables of the prediction outputs.
 # takes argument for "unassigned" threshold (default 0.4)  and "double-label" thresholod(0.05)
-
-
 #' CAM predict cell types in Flow Cytometry data by correlation to an existing reference matrix
-#'
 #' The function requires an reference matix already created with the same markers
 #' (antibodies) as used in the Flow Cytometry expression data frame. Correlation of
 #' expression across markers for each cell type in the reference matrix and each cell in the
@@ -909,11 +876,8 @@ get_clusters <- function(seu, method = "louvain",
 #' and R max 2 is less than or equal to "min_diff" that cell is assigned as a joint cell type. For
 #' example "neuron-npc". Test is a data frame of the expression for each marker and cell. Reference
 #' is the reference matrix, cell type by marker.
-
 #' @export
-#' @importFrom dplyr filter
 #' @importFrom kit topn
-
 find_correlation <- function(test,
                              reference,
                              min_corr = 0.1,
@@ -983,17 +947,23 @@ find_correlation <- function(test,
 }
 
 
+
 #' Plot correlation assignment model (CAM) results
+
 #'
+
 #' The function requires the data frame output from the find_correlation function
+
 #' Filter out cell type annotation with fewer than 'min_cells' for the plot
+
 #' The threshold with draw a line on the plot.  This can be set to the R theshold used in the find_correlation function.
 
 #' @export
 #' @examples
+#' \dontrun{
 #' plot_corr(cor_df, threshold = 0.3, min_cells = 300)
-#' @importFrom dplyr filter group_by select
-#' @import ggplot2 dplyr
+#' }
+#' @import ggplot2
 #' @importFrom reshape2 melt
 
 plot_corr <- function(df, threshold = 0, min_cells = 100) {
@@ -1123,33 +1093,63 @@ plot_corr <- function(df, threshold = 0, min_cells = 100) {
 }
 
 
+
 ##############################################################################################
 
+
 #' Train a Random Forest Classifier to predict cell types in a Seurat object
+
 #'
+
 #'Requires a Seurat object for the labels to be predicted. AB_list is the list of markers(antibodies)
+
 #'or selected features(genes) to input into the training model. An annotated Seurat object of matching
+
 #'data is required. The location of the annotations metadata needs to be designated:
+
 #'annotated_seurat_object$MetadataAnnotations_slot. If the number of cells is high the function may not run.  If this is the case
+
 #'use downsample to reduce the number of cells.  The starting data will be randomly selected from to
+
 #'reduce the total size. This data will then be split in 80/20 training to test data.
+
 #'A random seed can be set to repeat the training with different random starts and random splitting of
+
 #'data. The tuning parameters for the random forst model can be optomized. The best values are
+
 #'selected for the final model from mytry, maxnodes, trees
+
 #'mtry: number of features to draw at once.
+
 #'maxnodes: the terminal number of nodes trees in the forest can have.
+
 #'num_folds is for cross validation to avoid overfitting. The validation data is split from within the training data.
+
 #'Markers is the vector of the markers to select features from. If a RFM is need with only some of
+
 #'the markers in a reference data set selecting only those markers can be done with this argument.
+
 # after the best conditions are selected using the parameter search and cross validation these are used on the full training data.
+
 # cores_to_use is for parallel processing. Make sure not to exceed the number of cores you have available.
 
+
+
+
+
+
 #' @export
+
 #' @import data.table randomForest caret
+
 #' @importFrom randomForest randomForest
+
 #' @importFrom caret trainControl train
+
 #' @importFrom doParallel registerDoParallel stopImplicitCluster
+
 #' @import foreach
+
 #'
 RFM_train <- function(seurate_object,
                        markers,
@@ -1245,16 +1245,28 @@ RFM_train <- function(seurate_object,
 }
 
 
+
 ##############################################################################################
 
 
+
 #' Predict cell types in a Seurat object with a trained Random Forest Model
+
 #'
+
 #'Predict cell types in a Seurat object using a trained Random Forest Model.
+
 #'A trained model is required. Returns the Seurat object with the predictions
+
 #'added as the metadata slot 'rfm.labels'.
 
+
+
+
+
+
 #' @export
+
 #' @importFrom stats predict
 RFM_predict <- function(seu, rf){
   # prepare a data object to be test data
@@ -1266,25 +1278,47 @@ RFM_predict <- function(seu, rf){
 }
 
 
+
 ##############################################################################################
+
 # seurat_transfer
+
 # takes in a reference seurat object
+
 # follows seurat workflow, finds anchors, predicts labels
+
 # default of no threshold, a threshold can be applied
+
 # outputs prediction vector
 
+
 #' Predict cell types in a Seurat object with Seurat label transfer
+
 #'
+
 #'Predict cell types in a Seurat object using a reference Seurat object.
+
 #'An annotated Seurat object is required. The list of marker or features is required.
+
 #'Predictions of cell type for each cell are made using anchors. To increase speed use down.sample
+
 #'to down sample the reference by the cell types. Markers is a list of the flow cytometery antibodies,
+
 #'a vector of selected features(genes) is possible. The predictions will be added to the
+
 #'Seurat object as prediction name.
+
+
+
+
+
 #' @export
+
 #' @importFrom Seurat AddMetaData FindTransferAnchors TransferData
 
+
 # this funciton leaves more default settings but find the overlapping features between the reference and the query
+
 # setting anchors number and filter to defaults but permitting testing
 
 seurat_predict <- function(seu.q, seu.r, ref_id = 'labels', assay.q = "RNA", assay.r = "RNA",
@@ -1310,6 +1344,7 @@ seurat_predict <- function(seu.q, seu.r, ref_id = 'labels', assay.q = "RNA", ass
     query = seu.q,
     features = common.features, npcs = npc, dims = 1:npc, k.filter = kf, k.anchor = ka)
   # 4️⃣ Transfer labels & get prediction scores
+
 # this will make a dataframe - if we add in the query and reference it makes a seurat object
     pred <- TransferData(
     anchorset = anchors,
@@ -1324,31 +1359,54 @@ seurat_predict <- function(seu.q, seu.r, ref_id = 'labels', assay.q = "RNA", ass
 }
 
 
+
 ##############################################################################################
+
 
 # plot output of predictions
 
+
 # takes in a seurat object with the labels added
+
 # makes a dataframe with the count of predicted labels for each cluster
+
 # input seurat object with the predicted labels in the meta data
+
 # input the clusters meta data slot to be labels
+
 # input the meta data slot with the labels (correlation, random forest, seurat predicted)
 
 
+
 #' Creates a UMAP and barchart to visualize cell type predictions
+
 #'
+
 #'Takes a Seurat object with predicted cell type meta data slot(s) and cluster. Creates
+
 #'a UMAP with the predictions labelled and a bar chart with the proportion of predicted
+
 #'cell types in each cluster. There is an option to ignore the selected cell types using
+
 #'filter_out. The followin inputs are required:
+
 #'seu = Seurat_object
+
 #'seu.cluster = seu$RNA_snn_res.0.5 (the metadata slot with the clusters you want to annotate)
+
 #'seu.labels = seu$seu.pred (the metadata slot with the prediciton or labels to visualize)
+
 #'filter_out = c("unknown") enter the annotation to filter out or set
+
 #'filter_out = "none" to leave all annotations.
+
+
+
+
+
 #' @export
-#' @import dplyr ggplot2
-#' @importFrom dplyr filter
+
+#' @import ggplot2
 plot_lab_clust <- function(seu, seu.cluster, seu.labels, filter_out = c("unknown","Unknown","Mixed")){
   t.lables <- as.data.frame(table(seu.cluster, seu.labels))
   t.lables$Freq <- as.double(t.lables$Freq)
@@ -1362,20 +1420,15 @@ plot_lab_clust <- function(seu, seu.cluster, seu.labels, filter_out = c("unknown
 
 
 ## examples usage
-
 # input arguments
 #seu.clusters <- seu.t$RNA_snn_res.0.8   # cluster resolution to label
 #seu.lable <- seu.t$cor.labels   # predicted labels per cell meta data slot
-
 #test.cltable <- plot_lab_clust(seu, seu.clusters, seu.lable)
-
 #plot_lab_clust(seu, seu.clusters, seu.lable)
 
 ##############################################################################################
 
-
 #' Predict the cell type annotation for each cluster
-#'
 #'This function creates a data frame with the predicted cell type for each cluster. The
 #'Seurat object with clusters and predicted labels must be input. The cluster meta data slot
 #'to label and the predicted labels slot must both be input. Sometime many cells are predicted
@@ -1386,10 +1439,7 @@ plot_lab_clust <- function(seu, seu.cluster, seu.labels, filter_out = c("unknown
 #'seu.label = seu$seu.pred or seu$rfm.pred
 #'top_n = 2 (this is the number of cell types to visualize)
 #'Only the most frequent cell type for each cluster is used for the cluster annotation.
-
 #' @export
-#' @import dplyr
-#' @importFrom dplyr filter group_by mutate
 get_annotation <- function(seu, seu.cluster, seu.label, top_n = 3,
                            filter_out = 'none', Label = "Label"){
   t.lables <- as.data.frame(table(seu.cluster, seu.label))
@@ -1421,18 +1471,9 @@ get_annotation <- function(seu, seu.cluster, seu.label, top_n = 3,
   return(ann.df)
 }
 
-
-
-
-
 ##############################################################################################
 
-
-
-
-
 #' Add the consensus of annotations to a Seurat object from a list
-#'
 #'This function takes in a list of data frames with different annotation options.
 #'Use at least 2 options.  If you simple want to add annotations use "annotate",
 #'which is called by this function.The data frames can be created in R, read in
@@ -1442,11 +1483,7 @@ get_annotation <- function(seu, seu.cluster, seu.label, top_n = 3,
 #'"astrocytes" and "astrocyte" will not. The data slot to annotate must be indicated.
 #'To label the data slot with the consensus annotation set annotation_name. For example
 #'annotation_name = "CellTypeCon".
-
 #' @export
-#' @import dplyr
-#' @importFrom dplyr select
-
 cluster_annotate <- function(seu, ann.list,
                              annotation_name,
                              to_label){
@@ -1483,19 +1520,15 @@ cluster_annotate <- function(seu, ann.list,
                   annotation_name)
 }
 
-
 #' Add the annotations to a Seurat object
-#'
 #'This function takes in a column from a data frame or vector of cell type
 #'annotations. For example annotations = df$CellTypes or annotations = c("Neurons",
 #'"astrocytes","radial glia").The data slot to annotate must be indicated.
 #'To label the data slot with the consensus annotation set annotation_name.
 #'Default annotation_name = "CellType".
 #'Example: seu <- add_annotate(seu, annotations = df$CellTypes, to_label = seu$clusters, annotation_name = "CellTypes")
-
 #' @export
 #' @import Seurat
-#' @importFrom Seurat AddMetaData
 #'
 add_annotation <- function(seu, annotations, to_label, annotation_name = "CellType"){
 Idents(seu) <- to_label
@@ -1505,14 +1538,11 @@ seu <- AddMetaData(object=seu, metadata=Idents(seu), col.name = annotation_name)
 
 }
 
-
 ####### function to make a table with the most frequent cell type per cluster
 #' This function takes in a list of annotation data frames
 #' The outputs of get_annotations or a manually created data frame
 #' The colnames must be "Cluster" and a different column name for the prediction method.
 #' @export
-#' @import dplyr
-#' @importFrom dplyr select
 annotate_df <- function(ann.list){
   # not all annotations methods will always present
   # easiest to make the input a list
@@ -1538,15 +1568,10 @@ annotate_df <- function(ann.list){
   return(dfsort)
 }
 
-
-
-
 ######### functions to compare groups in an annotated seurat object ################
 
 #' Plot barcharts of proportion of cell types grouped by a list of variables
-#'
 #'This function takes a Seurat object and creates a boxplot each variable in the list.
-
 #' @export
 
 proportionplots <- function(seu, seu.var, seu.lable, groups = "Sample", my_colours= "default"){
@@ -1593,15 +1618,12 @@ plotproportions <- function(seu, var.list, xgroup, varnames, my_colours = 'defau
 
 
 #' Plot mean values by group in dotplot or heatmap
-#'
-#'
 #'This function takes a Seurat object and creates a heatmap or dotplot.
 #'This function takes a Seurat object and a list of variables to plot. One
 #'var_names is a vector with the levels of the seurat groups to be plotted
 #'group is the cell types or x axis grouping variable
 #'cluster_order is a character vector that can be used to reorder cell type annotations
 #'marker_order is the order to plot the markers
-
 
 #' @export
 #' @import data.table
@@ -1662,7 +1684,6 @@ plotmean <- function(plot_type = 'heatmap',seu, group, markers, var_names, input
   }
 }
 
-
 # plot heatmap and split by genotype
 meanplot_split <- function(dt.long, cluster_order, marker_order,
                          low_colour = "blue", mid_colour = "white", high_colour = "red",
@@ -1718,15 +1739,12 @@ meanplot_split <- function(dt.long, cluster_order, marker_order,
 
 ##############################################################################################
 
-
 #' Prepare a data frame for statistics
-#'
 #'This function takes a Seurat object and creates a data frame with the expression
 #'values for each cell for each marker.  Columns are created for all the indicated
 #'variables.  All the variables must exist as meta data in the Seurat object.
-#'
+
 #' @export
-#' @import data.table
 #' @importFrom data.table melt
 
 Prep_for_stats <- function(seu, marker_list, variables, marker_name = 'Marker'){
@@ -1747,23 +1765,17 @@ Prep_for_stats <- function(seu, marker_list, variables, marker_name = 'Marker'){
   return(molten)
 }
 
-
-
-
 ##############################################################################################
 
 #' Run one-way or two-way ANOVAs and Tukey's HSD test
-#'
 #'This function takes a data frame prepared by "Prep_for_stats" and outputs
 #'a list of ANOVA and TUKEY results. For two-way ANOVAs, stat_type = "ANOVA2". The
 #'interaction effect is calculated.
 #' group_cols is a vector with the columns to get the means from if use_means = NULL
 #' the means will not be calculated and n = number of cells instead of samples per group.
 #'id1 is the independent variable to compare (dependent variable is the expression)
-#' id2 is for 2 way anova and should be Marker or Celltype but other options are possible.
 #' value_col is the column name with the expression values.  This only needs to be
 #' changed if the input data frame wasn't created with the "Prep_for_stats" function.
-
 #' @export
 
 run_stats <- function(input_df, group_cols = c("Sample", "CellType", "Marker","Genotype"),
@@ -1997,6 +2009,7 @@ run_stats <- function(input_df, group_cols = c("Sample", "CellType", "Marker","G
 }
 
 
+
 # original get means function
 
 get_means <- function(df, group_cols, value_col) {
@@ -2009,8 +2022,6 @@ get_means <- function(df, group_cols, value_col) {
 }
 
 
-
-
 ###########################################################
 #' Permatation test multiple conditions using ANOVA
 #' Input single cell data in the from of sc_utils_obj
@@ -2020,11 +2031,9 @@ get_means <- function(df, group_cols, value_col) {
 #' A loop running the anova permutation test from the library permuco is run for each cell type.
 #' Example: permutation_avo <- permutation_test_multi(sc_utils_obj = sc_utils_obj,
 #' cluster_identity = "Celltypes",sample_identity = "IPSC")
-#'
 #' @export
-#' @import data.table
 #' @import permuco
-#' @import aovperm from permuco
+#' @importFrom permuco aovperm
 #'
 permutation_test_multi <- function(
   sc_utils_obj,

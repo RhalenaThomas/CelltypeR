@@ -2,7 +2,13 @@
 % Please edit documentation in R/CelltypeR.R
 \name{plotmean}
 \alias{plotmean}
-\title{Plot mean values by group in dotplot or heatmap}
+\title{Plot mean values by group in dotplot or heatmap
+This function takes a Seurat object and creates a heatmap or dotplot.
+This function takes a Seurat object and a list of variables to plot. One
+var_names is a vector with the levels of the seurat groups to be plotted
+group is the cell types or x axis grouping variable
+cluster_order is a character vector that can be used to reorder cell type annotations
+marker_order is the order to plot the markers}
 \usage{
 plotmean(
   plot_type = "heatmap",
@@ -10,7 +16,7 @@ plotmean(
   group,
   markers,
   var_names,
-  slot = "scale.data",
+  input_assay = "RNA",
   xlab = "Cell Types",
   ylab = "Markers",
   cluster_order = NULL,
@@ -21,6 +27,7 @@ plotmean(
 )
 }
 \description{
+Plot mean values by group in dotplot or heatmap
 This function takes a Seurat object and creates a heatmap or dotplot.
 This function takes a Seurat object and a list of variables to plot. One
 var_names is a vector with the levels of the seurat groups to be plotted

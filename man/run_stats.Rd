@@ -2,7 +2,15 @@
 % Please edit documentation in R/CelltypeR.R
 \name{run_stats}
 \alias{run_stats}
-\title{Run one-way or two-way ANOVAs and Tukey's HSD test}
+\title{Run one-way or two-way ANOVAs and Tukey's HSD test
+This function takes a data frame prepared by "Prep_for_stats" and outputs
+a list of ANOVA and TUKEY results. For two-way ANOVAs, stat_type = "ANOVA2". The
+interaction effect is calculated.
+group_cols is a vector with the columns to get the means from if use_means = NULL
+the means will not be calculated and n = number of cells instead of samples per group.
+id1 is the independent variable to compare (dependent variable is the expression)
+value_col is the column name with the expression values.  This only needs to be
+changed if the input data frame wasn't created with the "Prep_for_stats" function.}
 \usage{
 run_stats(
   input_df,
@@ -16,13 +24,13 @@ run_stats(
 )
 }
 \description{
+Run one-way or two-way ANOVAs and Tukey's HSD test
 This function takes a data frame prepared by "Prep_for_stats" and outputs
 a list of ANOVA and TUKEY results. For two-way ANOVAs, stat_type = "ANOVA2". The
 interaction effect is calculated.
 group_cols is a vector with the columns to get the means from if use_means = NULL
 the means will not be calculated and n = number of cells instead of samples per group.
 id1 is the independent variable to compare (dependent variable is the expression)
-id2 is for 2 way anova and should be Marker or Celltype but other options are possible.
 value_col is the column name with the expression values.  This only needs to be
 changed if the input data frame wasn't created with the "Prep_for_stats" function.
 }

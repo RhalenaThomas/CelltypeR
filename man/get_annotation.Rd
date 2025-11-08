@@ -2,7 +2,17 @@
 % Please edit documentation in R/CelltypeR.R
 \name{get_annotation}
 \alias{get_annotation}
-\title{Predict the cell type annotation for each cluster}
+\title{Predict the cell type annotation for each cluster
+This function creates a data frame with the predicted cell type for each cluster. The
+Seurat object with clusters and predicted labels must be input. The cluster meta data slot
+to label and the predicted labels slot must both be input. Sometime many cells are predicted
+as unknown or another unwanted type. The option filter_out = c("unknown","mixed") can be used to
+ignore these cell types if they are the most frequent cell type in a given cluster and annotate
+using the second most frequent cell type.
+seu.cluster = seu$RNA_snn_res.0.5
+seu.label = seu$seu.pred or seu$rfm.pred
+top_n = 2 (this is the number of cell types to visualize)
+Only the most frequent cell type for each cluster is used for the cluster annotation.}
 \usage{
 get_annotation(
   seu,
@@ -14,6 +24,7 @@ get_annotation(
 )
 }
 \description{
+Predict the cell type annotation for each cluster
 This function creates a data frame with the predicted cell type for each cluster. The
 Seurat object with clusters and predicted labels must be input. The cluster meta data slot
 to label and the predicted labels slot must both be input. Sometime many cells are predicted
