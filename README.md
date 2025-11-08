@@ -42,7 +42,7 @@ library(devtools)
 Install CelltypeR library using devtools
 
 ```
-devtools::install_github("RhalenaThomas/CelltypeR/CelltypeR")
+devtools::install_github("RhalenaThomas/CelltypeR")
 ```
 Load CelltypeR library
 
