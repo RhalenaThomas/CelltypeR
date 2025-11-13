@@ -27,11 +27,8 @@ If you use this library please site:
 Thomas, Rhalena A., et al. "CelltypeR: A flow cytometry pipeline to annotate, characterize and isolate single cells from brain organoids." bioRxiv (2022): 2022-11.
 doi: https://doi.org/10.1101/2022.11.11.516066
 
------ temporarily not working ---------------
-
-
-# To install the CelltypeR library - once the new version is release !!!!!!
-Install devtools package
+# To install the CelltypeR library 
+Install remotes package
 
 ```
 install.packages("remotes")
