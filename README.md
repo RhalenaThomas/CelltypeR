@@ -19,8 +19,8 @@ ExampleOuts:
 Rscripts: 
 - Analysis using CelltypeR for larger amounts of data run outside workbooks
 
-CelltypeR: 
-- this folder contains all library documents
+CelltypeR library:
+R: 
 - All functions are in the file CelltypeR.R
 
 If you use this library please site: 
