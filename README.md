@@ -23,6 +23,8 @@ CelltypeR library:
 R: 
 - All functions are in the file CelltypeR.R
 
+# Citation
+
 If you use this library please site: 
 Thomas, Rhalena A., et al. "CelltypeR: A flow cytometry pipeline to annotate, characterize and isolate single cells from brain organoids." bioRxiv (2022): 2022-11.
 doi: https://doi.org/10.1101/2022.11.11.516066
@@ -80,8 +82,4 @@ Note: the current version of CelltypeR is not compatible with Seurat Version 5. 
 If you are encountering an error or need help please open an issue. https://docs.github.com/en/issues/tracking-your-work-with-issues/creating-an-issue
 Contributions are welcome please contact Rhalena Thomas. 
 
-# Citation
-
-If you use this R package or any of the code or data in this repository in your research please cite:
-https://www.biorxiv.org/content/10.1101/2022.11.11.516066v3
 
