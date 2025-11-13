@@ -34,15 +34,21 @@ doi: https://doi.org/10.1101/2022.11.11.516066
 Install devtools package
 
 ```
-install.packages("devtools")
+install.packages("remotes")
 # load the library
-library(devtools)
+library(remotes)
 ```
 
 Install CelltypeR library using devtools
 
 ```
-devtools::install_github("RhalenaThomas/CelltypeR")
+remotes::install_github("RhalenaThomas/CelltypeR")
+
+# If you encounter “.rs.downloadFile() failed” error during install
+# then force curl method explicitly:
+options(download.file.method = "curl")
+install.packages("remotes")  # if not already installed
+remotes::install_github("RhalenaThomas/CelltypeR")
 ```
 Load CelltypeR library
 
